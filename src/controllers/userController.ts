@@ -47,6 +47,7 @@ export async function logInUser(req: Request, res: Response) {
             jwtSecret,
             { expiresIn: '1h' }
         );
+        
         const refresh = jwt.sign(
             { id: user._id.toString(), email: user.email },
             jwtRefreshSecret,

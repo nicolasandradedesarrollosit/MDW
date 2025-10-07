@@ -1,4 +1,71 @@
-POST USERS:
+=============================================================================
+                    DOCUMENTACIÓN API - MDW BACKEND
+=============================================================================
+
+BASE URL (Local): http://localhost:4000
+BASE URL (Producción): https://tu-app.onrender.com
+
+=============================================================================
+                           ENDPOINTS DISPONIBLES
+=============================================================================
+
+1. POST /api/user          - Crear un nuevo usuario
+2. POST /api/login         - Iniciar sesión
+3. POST /api/products      - Crear un nuevo producto
+4. GET  /api/cart          - Obtener carrito del usuario (requiere autenticación)
+5. POST /api/cart          - Crear carrito (requiere autenticación)
+6. GET  /health-check      - Verificar estado del servidor
+
+=============================================================================
+                           AUTENTICACIÓN
+=============================================================================
+
+La autenticación se realiza mediante JWT (JSON Web Tokens) almacenados en cookies.
+
+Flujo:
+1. El usuario se registra con POST /api/user
+2. El usuario inicia sesión con POST /api/login
+3. El servidor devuelve cookies (accessToken y refreshToken)
+4. Las cookies se envían automáticamente en requests subsecuentes
+5. Los endpoints protegidos validan el accessToken
+
+Cookies generadas:
+- accessToken: Duración 1 hora
+- refreshToken: Duración 7 días
+
+=============================================================================
+                    1. CREAR USUARIO - POST /api/user
+=============================================================================
+
+ENDPOINT: POST /api/user
+AUTENTICACIÓN: No requerida
+
+VALIDACIONES:
+- name: String, 2-50 caracteres, obligatorio
+- lastName: String, 2-50 caracteres, obligatorio
+- email: String, formato email válido, único, obligatorio
+- age: Integer, >= 0, opcional
+- password: String, mínimo 8 caracteres, obligatorio
+
+RESPUESTA EXITOSA (201):
+{
+  "message": "Usuario creado exitosamente",
+  "user": {
+    "_id": "68e586f16c87a503b8a50c1a",
+    "name": "Juan",
+    "lastName": "Pérez",
+    "email": "juan.perez@example.com",
+    "age": 25
+  }
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS EXITOSOS
+-----------------------------------------------------------------------------
+
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
 {
   "name": "Juan",
   "lastName": "Pérez",
@@ -6,6 +73,9 @@ POST USERS:
   "age": 25,
   "password": "Password123!"
 }
+
+POST http://localhost:4000/api/user
+Content-Type: application/json
 
 {
   "name": "María",
@@ -15,55 +85,382 @@ POST USERS:
   "password": "SecurePass456!"
 }
 
-LOG USERS:
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "Carlos",
+  "lastName": "Rodríguez",
+  "email": "carlos.rodriguez@example.com",
+  "password": "MySecurePass789"
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS CON ERRORES
+-----------------------------------------------------------------------------
+
+# Error: Email inválido
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "Pedro",
+  "lastName": "Rodríguez",
+  "email": "email_invalido",
+  "age": 25,
+  "password": "Password123"
+}
+
+# Error: Edad negativa
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "Ana",
+  "lastName": "López",
+  "email": "ana.lopez@example.com",
+  "age": -5,
+  "password": "Password123!"
+}
+
+# Error: Contraseña muy corta
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "Luis",
+  "lastName": "Martínez",
+  "email": "luis.martinez@example.com",
+  "age": 28,
+  "password": "123"
+}
+
+# Error: Email duplicado
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "Otro",
+  "lastName": "Usuario",
+  "email": "juan.perez@example.com",
+  "age": 25,
+  "password": "Password123!"
+}
+
+# Error: Campos faltantes
+POST http://localhost:4000/api/user
+Content-Type: application/json
+
+{
+  "name": "José",
+  "email": "jose@example.com"
+}
+
+=============================================================================
+                    2. LOGIN - POST /api/login
+=============================================================================
+
+ENDPOINT: POST /api/login
+AUTENTICACIÓN: No requerida
+
+VALIDACIONES:
+- email: String, formato email válido, obligatorio
+- password: String, obligatorio
+
+RESPUESTA EXITOSA (200):
+{
+  "message": "Login exitoso"
+}
+
+NOTA: Las cookies (accessToken y refreshToken) se establecen automáticamente
+
+-----------------------------------------------------------------------------
+TESTS - CASOS EXITOSOS
+-----------------------------------------------------------------------------
+
+POST http://localhost:4000/api/login
+Content-Type: application/json
 
 {
   "email": "juan.perez@example.com",
   "password": "Password123!"
 }
+
+POST http://localhost:4000/api/login
+Content-Type: application/json
 
 {
   "email": "maria.garcia@example.com",
   "password": "SecurePass456!"
 }
 
-USERS CON ERRORES:
+-----------------------------------------------------------------------------
+TESTS - CASOS CON ERRORES
+-----------------------------------------------------------------------------
+
+# Error: Contraseña incorrecta
+POST http://localhost:4000/api/login
+Content-Type: application/json
 
 {
   "email": "juan.perez@example.com",
   "password": "WrongPassword"
 }
 
+# Error: Usuario no existe
+POST http://localhost:4000/api/login
+Content-Type: application/json
+
 {
   "email": "noexiste@example.com",
   "password": "Password123!"
 }
 
+# Error: Email faltante
+POST http://localhost:4000/api/login
+Content-Type: application/json
+
 {
-  "name": "Pedro",
-  "lastName": "Rodríguez",
-  "email": "email_invalido",
-  "age": -5,
-  "password": "123"
+  "password": "Password123!"
 }
 
-PRODUCTS POST
+=============================================================================
+                3. CREAR PRODUCTO - POST /api/products
+=============================================================================
+
+ENDPOINT: POST /api/products
+AUTENTICACIÓN: No requerida
+
+VALIDACIONES:
+- name: String, 2-100 caracteres, obligatorio
+- description: String, 5-500 caracteres, opcional
+- price: Integer, >= 0, obligatorio
+- stock: Integer, >= 0, obligatorio
+
+RESPUESTA EXITOSA (201):
+{
+  "message": "Producto creado exitosamente",
+  "product": {
+    "_id": "68e586f16c87a503b8a50c1a",
+    "name": "Laptop Gaming",
+    "description": "Laptop de alto rendimiento para gaming",
+    "price": 1299.99,
+    "stock": 50
+  }
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS EXITOSOS
+-----------------------------------------------------------------------------
+
+POST http://localhost:4000/api/products
+Content-Type: application/json
 
 {
   "name": "Laptop Gaming",
   "description": "Laptop de alto rendimiento para gaming",
-  "price": 1299.99,
+  "price": 1299,
   "stock": 50
 }
+
+POST http://localhost:4000/api/products
+Content-Type: application/json
 
 {
   "name": "Smartphone Android",
   "description": "Teléfono inteligente con cámara de 64MP",
-  "price": 699.99,
+  "price": 699,
   "stock": 100
 }
 
-CART POST
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "Auriculares Bluetooth",
+  "description": "Auriculares inalámbricos con cancelación de ruido",
+  "price": 150,
+  "stock": 200
+}
+
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "Mouse Gaming",
+  "price": 45,
+  "stock": 75
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS CON ERRORES
+-----------------------------------------------------------------------------
+
+# Error: Nombre muy corto
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "P",
+  "description": "Producto de prueba",
+  "price": 100,
+  "stock": 10
+}
+
+# Error: Precio negativo
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "Producto Test",
+  "description": "Descripción del producto",
+  "price": -50,
+  "stock": 10
+}
+
+# Error: Stock negativo
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "Producto Test",
+  "description": "Descripción del producto",
+  "price": 100,
+  "stock": -5
+}
+
+# Error: Campos faltantes
+POST http://localhost:4000/api/products
+Content-Type: application/json
+
+{
+  "name": "Producto Test"
+}
+
+=============================================================================
+                4. OBTENER CARRITO - GET /api/cart
+=============================================================================
+
+ENDPOINT: GET /api/cart
+AUTENTICACIÓN: Requerida (accessToken en cookies)
+
+DESCRIPCIÓN: Obtiene el carrito del usuario autenticado con los productos poblados
+
+RESPUESTA EXITOSA (200):
+{
+  "_id": "68e5870a6c87a503b8a50c1e",
+  "userId": "68e586f16c87a503b8a50c1a",
+  "products": [
+    {
+      "productId": {
+        "_id": "68e586f16c87a503b8a50c1a",
+        "name": "Laptop Gaming",
+        "description": "Laptop de alto rendimiento para gaming",
+        "price": 1299,
+        "stock": 50
+      },
+      "quantity": 1
+    },
+    {
+      "productId": {
+        "_id": "68e586fe6c87a503b8a50c1c",
+        "name": "Smartphone Android",
+        "description": "Teléfono inteligente con cámara de 64MP",
+        "price": 699,
+        "stock": 100
+      },
+      "quantity": 2
+    }
+  ]
+}
+
+RESPUESTA ERROR (404):
+{
+  "message": "Carrito no encontrado"
+}
+
+RESPUESTA ERROR (401):
+{
+  "message": "Token no proporcionado"
+}
+O
+{
+  "message": "Token inválido"
+}
+
+-----------------------------------------------------------------------------
+TESTS
+-----------------------------------------------------------------------------
+
+GET http://localhost:4000/api/cart
+Cookie: accessToken=<tu_token_jwt>
+
+NOTA: El token se obtiene automáticamente después de hacer login
+
+=============================================================================
+                5. CREAR CARRITO - POST /api/cart
+=============================================================================
+
+ENDPOINT: POST /api/cart
+AUTENTICACIÓN: Requerida (accessToken en cookies)
+
+VALIDACIONES:
+- products: Array de objetos, mínimo 1 elemento, obligatorio
+  - productId: String (MongoDB ObjectId), obligatorio
+  - quantity: Integer, >= 1, obligatorio
+
+DESCRIPCIÓN: Crea un carrito para el usuario autenticado. Valida que todos
+los productos existan en la base de datos antes de crear el carrito.
+
+RESPUESTA EXITOSA (201):
+{
+  "message": "Carrito creado exitosamente",
+  "cart": {
+    "_id": "68e5870a6c87a503b8a50c1e",
+    "userId": "68e586f16c87a503b8a50c1a",
+    "products": [
+      {
+        "productId": "68e586f16c87a503b8a50c1a",
+        "quantity": 1
+      },
+      {
+        "productId": "68e586fe6c87a503b8a50c1c",
+        "quantity": 2
+      }
+    ]
+  }
+}
+
+RESPUESTA ERROR (400):
+{
+  "message": "Debe proporcionar un arreglo de productos no vacío"
+}
+O
+{
+  "message": "Cada producto debe tener productId y quantity válida (mínimo 1)"
+}
+
+RESPUESTA ERROR (404):
+{
+  "message": "Producto con ID 68e586f16c87a503b8a50c1a no encontrado"
+}
+
+RESPUESTA ERROR (401):
+{
+  "message": "Token no proporcionado"
+}
+O
+{
+  "message": "Token inválido"
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS EXITOSOS
+-----------------------------------------------------------------------------
+
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+Cookie: accessToken=<tu_token_jwt>
 
 {
   "products": [
@@ -77,4 +474,177 @@ CART POST
     }
   ]
 }
+
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+Cookie: accessToken=<tu_token_jwt>
+
+{
+  "products": [
+    {
+      "productId": "68e586f16c87a503b8a50c1a",
+      "quantity": 5
+    }
+  ]
+}
+
+-----------------------------------------------------------------------------
+TESTS - CASOS CON ERRORES
+-----------------------------------------------------------------------------
+
+# Error: Array vacío
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+Cookie: accessToken=<tu_token_jwt>
+
+{
+  "products": []
+}
+
+# Error: Cantidad inválida
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+Cookie: accessToken=<tu_token_jwt>
+
+{
+  "products": [
+    {
+      "productId": "68e586f16c87a503b8a50c1a",
+      "quantity": 0
+    }
+  ]
+}
+
+# Error: ProductId inválido / no existe
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+Cookie: accessToken=<tu_token_jwt>
+
+{
+  "products": [
+    {
+      "productId": "000000000000000000000000",
+      "quantity": 1
+    }
+  ]
+}
+
+# Error: Sin token de autenticación
+POST http://localhost:4000/api/cart
+Content-Type: application/json
+
+{
+  "products": [
+    {
+      "productId": "68e586f16c87a503b8a50c1a",
+      "quantity": 1
+    }
+  ]
+}
+
+=============================================================================
+                6. HEALTH CHECK - GET /health-check
+=============================================================================
+
+ENDPOINT: GET /health-check
+AUTENTICACIÓN: No requerida
+
+DESCRIPCIÓN: Verifica que el servidor esté funcionando correctamente
+
+RESPUESTA EXITOSA (200):
+{
+  "ok": true,
+  "message": "API corriendo"
+}
+
+-----------------------------------------------------------------------------
+TEST
+-----------------------------------------------------------------------------
+
+GET http://localhost:4000/health-check
+
+=============================================================================
+                        CÓDIGOS DE ESTADO HTTP
+=============================================================================
+
+200 - OK: Solicitud exitosa (GET, POST login)
+201 - Created: Recurso creado exitosamente (POST user, product, cart)
+400 - Bad Request: Datos inválidos o faltantes
+401 - Unauthorized: Token no proporcionado o inválido
+404 - Not Found: Recurso no encontrado
+500 - Internal Server Error: Error del servidor
+
+=============================================================================
+                        MODELOS DE DATOS
+=============================================================================
+
+USER MODEL:
+{
+  _id: ObjectId,
+  name: String (2-50 chars),
+  lastName: String (2-50 chars),
+  email: String (unique, valid email),
+  age: Number (optional, >= 0),
+  password: String (hashed, min 8 chars)
+}
+
+PRODUCT MODEL:
+{
+  _id: ObjectId,
+  name: String (2-100 chars),
+  description: String (optional, 5-500 chars),
+  price: Number (>= 0),
+  stock: Number (>= 0)
+}
+
+CART MODEL:
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: User),
+  products: [
+    {
+      productId: ObjectId (ref: Product),
+      quantity: Number (>= 1)
+    }
+  ]
+}
+
+=============================================================================
+                    NOTAS PARA TESTING CON POSTMAN/INSOMNIA
+=============================================================================
+
+1. CONFIGURAR COOKIES AUTOMÁTICAS:
+   - En Postman: Settings → Enable "Automatically follow redirects"
+   - Las cookies se guardan automáticamente después del login
+
+2. FLUJO RECOMENDADO DE TESTING:
+   a) POST /api/user - Crear usuario
+   b) POST /api/login - Hacer login (guarda cookies)
+   c) POST /api/products - Crear productos (guardar los IDs)
+   d) POST /api/cart - Crear carrito con los IDs de productos
+   e) GET /api/cart - Verificar el carrito creado
+
+3. OBTENER IDs DE PRODUCTOS:
+   - Después de crear productos, copia sus _id de la respuesta
+   - Úsalos en el campo productId del carrito
+
+4. TESTING DE AUTENTICACIÓN:
+   - Los endpoints /api/cart requieren estar logueado
+   - Asegúrate de hacer login primero
+   - Las cookies expiran después de 1 hora
+
+=============================================================================
+                        VARIABLES DE ENTORNO
+=============================================================================
+
+MONGO_URI: URI de conexión a MongoDB Atlas
+PORT: Puerto del servidor (default: 4000)
+JWT_SECRET: Clave secreta para tokens de acceso
+JWT_REFRESH_SECRET: Clave secreta para tokens de refresco
+NODE_ENV: development | production
+FRONTEND_URL: URL del frontend (para CORS)
+
+=============================================================================
+                           FIN DE LA DOCUMENTACIÓN
+=============================================================================
 
