@@ -46,3 +46,35 @@ USERS CON ERRORES:
   "age": -5,
   "password": "123"
 }
+
+PRODUCTS POST
+
+{
+  "name": "Laptop Gaming",
+  "description": "Laptop de alto rendimiento para gaming",
+  "price": 1299.99,
+  "stock": 50
+}
+
+{
+  "name": "Smartphone Android",
+  "description": "Teléfono inteligente con cámara de 64MP",
+  "price": 699.99,
+  "stock": 100
+}
+
+CART POST
+
+{
+  "products": [
+    {
+      "productId": "68e586f16c87a503b8a50c1a",
+      "quantity": 1
+    },
+    {
+      "productId": "68e586fe6c87a503b8a50c1c",
+      "quantity": 2
+    }
+  ]
+}
+

@@ -3,7 +3,7 @@ import {
     logInUser
  } from "../controllers/userController.js";
 import { CreateUserDto } from "../dto/createUser.dto.js";
-import  validationMiddleware  from "../middlewares/middleware.js";
+import { validationMiddleware } from "../middlewares/middleware.js";
 import { Router } from "express";
 
 const r = Router();
