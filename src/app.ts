@@ -2,14 +2,17 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import 'dotenv/config';
-import userRoutes from './routes/userRoutes.js'
+import userRoutes from './routes/userRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 dotenv.config();
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use('/api', userRoutes);
+app.use('/api', productRoutes);
 
 app.get('/health-check', async (_req, res) => {
     res.status(200).json({ ok: true, message: 'API corriendo' });

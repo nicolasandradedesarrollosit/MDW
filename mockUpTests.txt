@@ -1,0 +1,48 @@
+POST USERS:
+{
+  "name": "Juan",
+  "lastName": "Pérez",
+  "email": "juan.perez@example.com",
+  "age": 25,
+  "password": "Password123!"
+}
+
+{
+  "name": "María",
+  "lastName": "García",
+  "email": "maria.garcia@example.com",
+  "age": 30,
+  "password": "SecurePass456!"
+}
+
+LOG USERS:
+
+{
+  "email": "juan.perez@example.com",
+  "password": "Password123!"
+}
+
+{
+  "email": "maria.garcia@example.com",
+  "password": "SecurePass456!"
+}
+
+USERS CON ERRORES:
+
+{
+  "email": "juan.perez@example.com",
+  "password": "WrongPassword"
+}
+
+{
+  "email": "noexiste@example.com",
+  "password": "Password123!"
+}
+
+{
+  "name": "Pedro",
+  "lastName": "Rodríguez",
+  "email": "email_invalido",
+  "age": -5,
+  "password": "123"
+}
