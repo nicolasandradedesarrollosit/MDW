@@ -1,7 +1,7 @@
 import User from '../models/userModel.js';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -56,14 +56,14 @@ export async function logInUser(req: Request, res: Response) {
 
         res.cookie('accessToken', access, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false,
             sameSite: 'lax',
             maxAge: 60 * 1000 * 60
         });
 
         res.cookie('refreshToken', refresh, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: false,
             sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000 
         });
