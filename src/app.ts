@@ -12,9 +12,7 @@ const app = express();
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'http://localhost:4000',
-    'https://mdw-frontend.vercel.app',
-    'https://mdw-teal.vercel.app'
+    'https://mdw-frontend.vercel.app'
 ];
 
 app.use(cors({
