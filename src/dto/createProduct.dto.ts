@@ -30,4 +30,12 @@ export class CreateProductDto {
     @Min(0, { message: 'El stock no puede ser negativo' })
     @IsNotEmpty({ message: 'El stock es obligatorio' })
     stock!: number;
+
+    @IsString({message: 'La URL de la imagen debe ser una cadena'})
+    @IsNotEmpty({ message: 'La URL de la imagen es obligatoria' })
+    url_image!: string;
+
+    @IsString({message: 'El id de categoria debe ser una cadena'})
+    @IsNotEmpty({ message: 'El id de categoria es obligatorio' })
+    id_category!: string;
 }

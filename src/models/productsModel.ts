@@ -18,6 +18,15 @@ const productsSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 0
+    },
+    url_image: {
+        type: String,
+        required: true
+    },
+    id_category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
     }
 }, { timestamps: true });
 
