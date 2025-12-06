@@ -99,3 +99,19 @@ export async function logInUser(req: Request, res: Response) {
         res.status(500).json({ message: 'Error interno del servidor', error: err instanceof Error ? err.message : 'Unknown error' });
     }
 }
+
+export async function checkSession(req: Request, res: Response) {
+    const token = req.cookies.accessToken;
+
+    if (!token) return res.status(401).json({loggedIn: false});
+
+    try {
+        const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
+        const payload: any = jwt.verify(token, jwtSecret);
+        
+        res.json({loggedIn: true, _id: payload.id});
+    }
+    catch (err) {
+        res.status(401).json({loggedIn: false});
+    }
+}
