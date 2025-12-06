@@ -25,13 +25,20 @@ app.get('/health-check', async (_req, res) => {
     res.status(200).json({ ok: true, message: 'API corriendo' });
 })
 
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`, req.body);
+    next();
+});
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Error en request:', {
     path: req.path,
+    method: req.method,
     body: req.body,
-    error: err.stack
+    error: err.message,
+    stack: err.stack
   });
-  res.status(500).json({ message: 'Error interno del servidor' });
+  res.status(500).json({ message: 'Error interno del servidor', detail: err.message });
 });
 
 export default app;
