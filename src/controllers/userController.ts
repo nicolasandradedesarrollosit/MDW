@@ -62,13 +62,25 @@ export async function logInUser(req: Request, res: Response) {
         const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
 
         const access = jwt.sign(
-            { id: user._id.toString(), email: user.email },
+            { 
+                id: user._id.toString(), 
+                email: user.email,
+                name: user.name,
+                lastName: user.lastName,
+                age: user.age
+            },
             jwtSecret,
             { expiresIn: '1h' }
         );
         
         const refresh = jwt.sign(
-            { id: user._id.toString(), email: user.email },
+            { 
+                id: user._id.toString(), 
+                email: user.email,
+                name: user.name,
+                lastName: user.lastName,
+                age: user.age
+            },
             jwtRefreshSecret,
             { expiresIn: '7d' }
         );
@@ -109,7 +121,7 @@ export async function checkSession(req: Request, res: Response) {
         const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
         const payload: any = jwt.verify(token, jwtSecret);
         
-        res.json({loggedIn: true, _id: payload.id});
+        res.json({loggedIn: true, name: payload.name, email: payload.email, lastName: payload.lastName, age: payload.age});
     }
     catch (err) {
         res.status(401).json({loggedIn: false});
