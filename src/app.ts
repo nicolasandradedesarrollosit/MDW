@@ -10,8 +10,24 @@ import cartRoutes from './routes/cartRoutes.js';
 dotenv.config();
 const app = express();
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:4000',
+    'https://mdw-frontend.vercel.app',
+    'https://mdw-teal.vercel.app'
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log('Origen bloqueado por CORS:', origin);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     credentials: true,
 }));
 app.use(express.json());
