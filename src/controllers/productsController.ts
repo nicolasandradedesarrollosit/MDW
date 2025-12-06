@@ -19,3 +19,13 @@ export async function createProduct(req: Request, res: Response) {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 }
+
+export async function getProducts(req: Request, res: Response) {
+    try {
+        const products = await Product.find();
+        res.status(200).json(products);
+    }
+    catch(err){
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+}
