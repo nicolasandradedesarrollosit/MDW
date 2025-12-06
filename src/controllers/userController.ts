@@ -1,7 +1,7 @@
 import User from '../models/userModel.js';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -61,13 +61,13 @@ export async function logInUser(req: Request, res: Response) {
         const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
         const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
 
-        const access = sign(
+        const access = jwt.sign(
             { id: user._id.toString(), email: user.email },
             jwtSecret,
             { expiresIn: '1h' }
         );
         
-        const refresh = sign(
+        const refresh = jwt.sign(
             { id: user._id.toString(), email: user.email },
             jwtRefreshSecret,
             { expiresIn: '7d' }
