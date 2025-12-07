@@ -7,6 +7,7 @@ dotenv.config();
 
 export async function createUser(req: Request, res: Response) {
     try{
+        console.log('createUser - Datos recibidos:', req.body);
         const { name, lastName, email, age, password } = req.body;
 
         const passwordHash = await bcrypt.hash(password, 10);
@@ -20,12 +21,64 @@ export async function createUser(req: Request, res: Response) {
         });
 
         const savedUser = await newUser.save();
+        console.log('Usuario guardado exitosamente:', savedUser.email);
+        
         const userResponse: any = savedUser.toObject();
         delete userResponse.password;
 
-        res.status(201).json({ message: 'Usuario creado exitosamente', user: userResponse });
+        const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
+        const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
+
+        console.log('Generando tokens para nuevo usuario...');
+        const access = jwt.sign(
+            { 
+                id: savedUser._id.toString(), 
+                email: savedUser.email,
+                name: savedUser.name,
+                lastName: savedUser.lastName,
+                age: savedUser.age
+            },
+            jwtSecret,
+            { expiresIn: '1h' }
+        );
+        
+        const refresh = jwt.sign(
+            { 
+                id: savedUser._id.toString(), 
+                email: savedUser.email,
+                name: savedUser.name,
+                lastName: savedUser.lastName,
+                age: savedUser.age
+            },
+            jwtRefreshSecret,
+            { expiresIn: '7d' }
+        );
+
+        const isProduction = process.env.NODE_ENV === 'production';
+        console.log('Configurando cookies (isProduction:', isProduction, ')');
+        
+        res.cookie('accessToken', access, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            maxAge: 60 * 1000 * 60
+        });
+
+        res.cookie('refreshToken', refresh, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000 
+        });
+
+        console.log('Cookies configuradas, enviando respuesta...');
+        console.log('accessToken (primeros 50 chars):', access.substring(0, 50));
+        console.log('refreshToken (primeros 50 chars):', refresh.substring(0, 50));
+        
+        return res.status(201).json({ message: 'Usuario creado exitosamente', user: userResponse });
     }
     catch(err){
+        console.error('Error en createUser:', err);
         res.status(500).json({ message: 'Error interno del servidor' }); 
     }
 }
