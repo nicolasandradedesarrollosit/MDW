@@ -36,7 +36,8 @@ export async function createUser(req: Request, res: Response) {
                 email: savedUser.email,
                 name: savedUser.name,
                 lastName: savedUser.lastName,
-                age: savedUser.age
+                age: savedUser.age,
+                isAdmin: savedUser.isAdmin
             },
             jwtSecret,
             { expiresIn: '1h' }
@@ -48,7 +49,8 @@ export async function createUser(req: Request, res: Response) {
                 email: savedUser.email,
                 name: savedUser.name,
                 lastName: savedUser.lastName,
-                age: savedUser.age
+                age: savedUser.age,
+                isAdmin: savedUser.isAdmin
             },
             jwtRefreshSecret,
             { expiresIn: '7d' }
@@ -120,7 +122,8 @@ export async function logInUser(req: Request, res: Response) {
                 email: user.email,
                 name: user.name,
                 lastName: user.lastName,
-                age: user.age
+                age: user.age,
+                isAdmin: user.isAdmin
             },
             jwtSecret,
             { expiresIn: '1h' }
@@ -132,7 +135,8 @@ export async function logInUser(req: Request, res: Response) {
                 email: user.email,
                 name: user.name,
                 lastName: user.lastName,
-                age: user.age
+                age: user.age,
+                isAdmin: user.isAdmin
             },
             jwtRefreshSecret,
             { expiresIn: '7d' }
@@ -174,7 +178,19 @@ export async function checkSession(req: Request, res: Response) {
         const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
         const payload: any = jwt.verify(token, jwtSecret);
         
-        res.json({loggedIn: true, name: payload.name, email: payload.email, lastName: payload.lastName, age: payload.age});
+        const response: any = {
+            loggedIn: true, 
+            name: payload.name, 
+            email: payload.email, 
+            lastName: payload.lastName, 
+            age: payload.age
+        };
+
+        if (payload.isAdmin) {
+            response.features = { adminPanel: true };
+        }
+
+        res.json(response);
     }
     catch (err) {
         res.status(401).json({loggedIn: false});
