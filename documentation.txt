@@ -2,7 +2,7 @@
                     DOCUMENTACIÓN API - MDW BACKEND
 =============================================================================
 
-BASE URL (Local): http://localhost:4000
+BASE URL (Local): http://localhost:4001
 BASE URL (Producción): https://tu-app.onrender.com
 
 =============================================================================
@@ -63,7 +63,7 @@ RESPUESTA EXITOSA (201):
 TESTS - CASOS EXITOSOS
 -----------------------------------------------------------------------------
 
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -74,7 +74,7 @@ Content-Type: application/json
   "password": "Password123!"
 }
 
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -85,7 +85,7 @@ Content-Type: application/json
   "password": "SecurePass456!"
 }
 
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -100,7 +100,7 @@ TESTS - CASOS CON ERRORES
 -----------------------------------------------------------------------------
 
 # Error: Email inválido
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -112,7 +112,7 @@ Content-Type: application/json
 }
 
 # Error: Edad negativa
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -124,7 +124,7 @@ Content-Type: application/json
 }
 
 # Error: Contraseña muy corta
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -136,7 +136,7 @@ Content-Type: application/json
 }
 
 # Error: Email duplicado
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -148,7 +148,7 @@ Content-Type: application/json
 }
 
 # Error: Campos faltantes
-POST http://localhost:4000/api/user
+POST http://localhost:4001/api/user
 Content-Type: application/json
 
 {
@@ -178,7 +178,7 @@ NOTA: Las cookies (accessToken y refreshToken) se establecen automáticamente
 TESTS - CASOS EXITOSOS
 -----------------------------------------------------------------------------
 
-POST http://localhost:4000/api/login
+POST http://localhost:4001/api/login
 Content-Type: application/json
 
 {
@@ -186,7 +186,7 @@ Content-Type: application/json
   "password": "Password123!"
 }
 
-POST http://localhost:4000/api/login
+POST http://localhost:4001/api/login
 Content-Type: application/json
 
 {
@@ -199,7 +199,7 @@ TESTS - CASOS CON ERRORES
 -----------------------------------------------------------------------------
 
 # Error: Contraseña incorrecta
-POST http://localhost:4000/api/login
+POST http://localhost:4001/api/login
 Content-Type: application/json
 
 {
@@ -208,7 +208,7 @@ Content-Type: application/json
 }
 
 # Error: Usuario no existe
-POST http://localhost:4000/api/login
+POST http://localhost:4001/api/login
 Content-Type: application/json
 
 {
@@ -217,7 +217,7 @@ Content-Type: application/json
 }
 
 # Error: Email faltante
-POST http://localhost:4000/api/login
+POST http://localhost:4001/api/login
 Content-Type: application/json
 
 {
@@ -253,7 +253,7 @@ RESPUESTA EXITOSA (201):
 TESTS - CASOS EXITOSOS
 -----------------------------------------------------------------------------
 
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -263,7 +263,7 @@ Content-Type: application/json
   "stock": 50
 }
 
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -273,7 +273,7 @@ Content-Type: application/json
   "stock": 100
 }
 
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -283,7 +283,7 @@ Content-Type: application/json
   "stock": 200
 }
 
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -297,7 +297,7 @@ TESTS - CASOS CON ERRORES
 -----------------------------------------------------------------------------
 
 # Error: Nombre muy corto
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -308,7 +308,7 @@ Content-Type: application/json
 }
 
 # Error: Precio negativo
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -319,7 +319,7 @@ Content-Type: application/json
 }
 
 # Error: Stock negativo
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -330,7 +330,7 @@ Content-Type: application/json
 }
 
 # Error: Campos faltantes
-POST http://localhost:4000/api/products
+POST http://localhost:4001/api/products
 Content-Type: application/json
 
 {
@@ -392,7 +392,7 @@ O
 TESTS
 -----------------------------------------------------------------------------
 
-GET http://localhost:4000/api/cart
+GET http://localhost:4001/api/cart
 Cookie: accessToken=<tu_token_jwt>
 
 NOTA: El token se obtiene automáticamente después de hacer login
@@ -458,7 +458,7 @@ O
 TESTS - CASOS EXITOSOS
 -----------------------------------------------------------------------------
 
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 Cookie: accessToken=<tu_token_jwt>
 
@@ -475,7 +475,7 @@ Cookie: accessToken=<tu_token_jwt>
   ]
 }
 
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 Cookie: accessToken=<tu_token_jwt>
 
@@ -493,7 +493,7 @@ TESTS - CASOS CON ERRORES
 -----------------------------------------------------------------------------
 
 # Error: Array vacío
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 Cookie: accessToken=<tu_token_jwt>
 
@@ -502,7 +502,7 @@ Cookie: accessToken=<tu_token_jwt>
 }
 
 # Error: Cantidad inválida
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 Cookie: accessToken=<tu_token_jwt>
 
@@ -516,7 +516,7 @@ Cookie: accessToken=<tu_token_jwt>
 }
 
 # Error: ProductId inválido / no existe
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 Cookie: accessToken=<tu_token_jwt>
 
@@ -530,7 +530,7 @@ Cookie: accessToken=<tu_token_jwt>
 }
 
 # Error: Sin token de autenticación
-POST http://localhost:4000/api/cart
+POST http://localhost:4001/api/cart
 Content-Type: application/json
 
 {
@@ -561,7 +561,7 @@ RESPUESTA EXITOSA (200):
 TEST
 -----------------------------------------------------------------------------
 
-GET http://localhost:4000/health-check
+GET http://localhost:4001/health-check
 
 =============================================================================
                         CÓDIGOS DE ESTADO HTTP
@@ -647,4 +647,5 @@ FRONTEND_URL: URL del frontend (para CORS)
 =============================================================================
                            FIN DE LA DOCUMENTACIÓN
 =============================================================================
+
 

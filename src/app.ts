@@ -31,6 +31,11 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
+
 app.use('/api', userRoutes);
 app.use('/api', productRoutes);
 app.use('/api', cartRoutes);
@@ -38,11 +43,6 @@ app.use('/api', cartRoutes);
 app.get('/health-check', async (_req, res) => {
     res.status(200).json({ ok: true, message: 'API corriendo' });
 })
-
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path}`, req.body);
-    next();
-});
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Error en request:', {

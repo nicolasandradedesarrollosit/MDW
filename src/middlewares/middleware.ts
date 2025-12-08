@@ -31,7 +31,23 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
     const decoded = jwt.verify(token, jwtSecret) as any;
 
-    (req as any).user = { id: decoded.id, email: decoded.email };
+    (req as any).user = { 
+        id: decoded.id, 
+        email: decoded.email,
+        isAdmin: decoded.isAdmin
+    };
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Token inválido' });
+  }
+};
+
+export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (req as any).user;
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: 'Acceso denegado: se requieren privilegios de administrador' });
+    }
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Token inválido' });
