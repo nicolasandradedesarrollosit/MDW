@@ -37,7 +37,7 @@ export async function createUser(req: Request, res: Response) {
                 name: savedUser.name,
                 lastName: savedUser.lastName,
                 age: savedUser.age,
-                isAdmin: savedUser.isAdmin
+                isAdmin: savedUser.isAdmin || false
             },
             jwtSecret,
             { expiresIn: '1h' }
@@ -50,7 +50,7 @@ export async function createUser(req: Request, res: Response) {
                 name: savedUser.name,
                 lastName: savedUser.lastName,
                 age: savedUser.age,
-                isAdmin: savedUser.isAdmin
+                isAdmin: savedUser.isAdmin || false
             },
             jwtRefreshSecret,
             { expiresIn: '7d' }
@@ -87,32 +87,24 @@ export async function createUser(req: Request, res: Response) {
 
 export async function logInUser(req: Request, res: Response) {
     try{
-        console.log('Intento de login con:', { email: req.body.email });
-        
         const { email, password } = req.body;
         
         if (!email || !password) {
-            console.log('Faltan credenciales');
             return res.status(400).json({ message: 'Email y contraseña son requeridos' });
         }
 
-        console.log('Buscando usuario en la base de datos...');
         const user = await User.findOne({email});
         
         if(!user) {
-            console.log('Usuario no encontrado:', email);
             return res.status(400).json({ message: 'Credenciales inválidas' });
         }
 
-        console.log('Usuario encontrado, verificando contraseña...');
         const isPasswordValid = await bcrypt.compare(password, user.password);
         
         if(!isPasswordValid) {
-            console.log('Contraseña inválida para:', email);
             return res.status(400).json({ message: 'Credenciales inválidas' });
         }
 
-        console.log('Generando tokens JWT...');
         const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
         const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
 
@@ -123,7 +115,7 @@ export async function logInUser(req: Request, res: Response) {
                 name: user.name,
                 lastName: user.lastName,
                 age: user.age,
-                isAdmin: user.isAdmin
+                isAdmin: user.isAdmin || false
             },
             jwtSecret,
             { expiresIn: '1h' }
@@ -136,13 +128,12 @@ export async function logInUser(req: Request, res: Response) {
                 name: user.name,
                 lastName: user.lastName,
                 age: user.age,
-                isAdmin: user.isAdmin
+                isAdmin: user.isAdmin || false
             },
             jwtRefreshSecret,
             { expiresIn: '7d' }
         );
 
-        console.log('Configurando cookies...');
         const isProduction = process.env.NODE_ENV === 'production';
         
         res.cookie('accessToken', access, {
@@ -159,14 +150,38 @@ export async function logInUser(req: Request, res: Response) {
             maxAge: 7 * 24 * 60 * 60 * 1000 
         });
 
-        console.log('Login exitoso para:', email);
-        return res.json({ message: "Login exitoso", user: { email: user.email, name: user.name } })
+        return res.json({ 
+            message: "Login exitoso", 
+            user: { 
+                email: user.email, 
+                name: user.name,
+                isAdmin: user.isAdmin
+            } 
+        })
 
     }
     catch(err){
         console.error('Error en logInUser:', err);
         res.status(500).json({ message: 'Error interno del servidor', error: err instanceof Error ? err.message : 'Unknown error' });
     }
+}
+
+export async function logout(req: Request, res: Response) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
+    });
+    
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
+    });
+    
+    res.status(200).json({ message: 'Logout exitoso' });
 }
 
 export async function checkSession(req: Request, res: Response) {
@@ -178,21 +193,37 @@ export async function checkSession(req: Request, res: Response) {
         const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
         const payload: any = jwt.verify(token, jwtSecret);
         
+        console.log('checkSession - payload completo:', payload);
+        
         const response: any = {
             loggedIn: true, 
             name: payload.name, 
             email: payload.email, 
             lastName: payload.lastName, 
-            age: payload.age
+            age: payload.age,
+            isAdmin: payload.isAdmin
         };
 
         if (payload.isAdmin) {
+            console.log('checkSession - Usuario es admin!');
             response.features = { adminPanel: true };
         }
 
+        console.log('checkSession - response:', response);
         res.json(response);
     }
     catch (err) {
         res.status(401).json({loggedIn: false});
+    }
+}
+
+export async function getUsers(req: Request, res: Response) {
+    try {
+        const users = await User.find().select('-password');
+        res.json(users);
+    }
+    catch (err) {
+        console.error('Error en getUsers:', err);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 }

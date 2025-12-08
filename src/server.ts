@@ -5,7 +5,7 @@ dotenv.config();
 import app from './app.js';
 import mongoose from 'mongoose';
 
-const PORT = Number(process.env.PORT || 4000);
+const PORT = Number(process.env.PORT || 4001);
 const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/mdw';
 
 const connectToDb = async () => {
