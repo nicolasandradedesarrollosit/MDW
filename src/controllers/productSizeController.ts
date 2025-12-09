@@ -1,4 +1,4 @@
-import ProductSize from '../models/productSizeModel';
+import ProductSize from '../models/productSizeModel.js';
 import { Request, Response } from 'express';
 
 export async function createProductSize(req: Request, res: Response) {

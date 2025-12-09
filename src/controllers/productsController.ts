@@ -4,12 +4,14 @@ import { Request, Response } from 'express';
 
 export async function createProduct(req: Request, res: Response) {
     try{
-        const { name, description, price } = req.body;
+        const { name, description, price, url_image, id_category } = req.body;
 
         const newProduct = new Product({
             name,
             description,
-            price
+            price,
+            url_image,
+            id_category
         });
 
         const savedProduct = await newProduct.save();
@@ -20,7 +22,7 @@ export async function createProduct(req: Request, res: Response) {
     }
 }
 
-export async function getProducts(req: Request, res: Response) {
+export async function getProducts(_req: Request, res: Response) {
     try {
         const products = await Product.find();
         res.status(200).json(products);

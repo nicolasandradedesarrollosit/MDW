@@ -10,6 +10,7 @@ import {
   Validate,
   MinLength,
   MaxLength,
+  Max,
 } from "class-validator";
 import userModel from "../models/userModel.js";
 
@@ -37,6 +38,8 @@ export class CreateUserDto {
 
     @IsEmail({}, { message: 'El email debe ser válido' })
     @IsNotEmpty({ message: 'El email es obligatorio' })
+    @MinLength(5, { message: 'El email debe tener al menos 5 caracteres' })
+    @MaxLength(100, { message: 'El email no puede tener más de 100 caracteres' })
     @Validate(IsEmailAlreadyExist)
     email!: string;
 
@@ -48,5 +51,17 @@ export class CreateUserDto {
     @IsString({ message: 'La contraseña debe ser una cadena' })
     @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
     @IsNotEmpty({ message: 'La contraseña es obligatoria' })
+    password!: string;
+}
+
+export class LogInDto {
+    @IsEmail({}, { message: 'El email debe ser válido' })
+    @IsNotEmpty({ message: 'El email es obligatorio' })
+    @MaxLength(100, { message: 'El email no puede tener más de 100 caracteres' })
+    email!: string;
+
+    @IsString({ message: 'La contraseña debe ser una cadena' })
+    @IsNotEmpty({ message: 'La contraseña es obligatoria' })
+    @MaxLength(100, { message: 'La contraseña no puede tener más de 100 caracteres' })
     password!: string;
 }
