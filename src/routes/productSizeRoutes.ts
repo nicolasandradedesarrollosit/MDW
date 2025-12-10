@@ -1,7 +1,8 @@
 import {
     getProductSizes,
     createProductSize,
-    deleteProductSize
+    deleteProductSize,
+    updateProductSize
 } from '../controllers/productSizeController.js';
 import { CreateProductSizeDto } from '../dto/productSize.dto.js';
 
@@ -18,5 +19,6 @@ const r = Router();
 r.get('/product-sizes', getProductSizes);
 r.post('/product-sizes', authMiddleware, adminMiddleware, validationMiddleware(CreateProductSizeDto), createProductSize);
 r.delete('/product-sizes/:id', authMiddleware, adminMiddleware, deleteProductSize);
+r.patch('/product-sizes/:id', authMiddleware, adminMiddleware, validationMiddleware(CreateProductSizeDto), updateProductSize);
 
 export default r;
