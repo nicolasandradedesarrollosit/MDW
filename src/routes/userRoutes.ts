@@ -3,7 +3,8 @@ import {
     logInUser,
     checkSession,
     logout,
-    getUsers
+    getUsers,
+    logInUserGoogle
  } from "../controllers/userController.js";
 import { CreateUserDto, LogInDto } from "../dto/user.dto.js";
 import { validationMiddleware, adminMiddleware, authMiddleware } from "../middlewares/middleware.js";
@@ -13,6 +14,7 @@ const r = Router();
 
 r.post('/user', validationMiddleware(CreateUserDto), createUser);
 r.post('/login', validationMiddleware(LogInDto), logInUser);
+r.post('/login-google', logInUserGoogle);
 r.post('/logout', authMiddleware, logout);
 r.get('/check-session', authMiddleware, checkSession);
 r.get('/users', authMiddleware, adminMiddleware, getUsers);
