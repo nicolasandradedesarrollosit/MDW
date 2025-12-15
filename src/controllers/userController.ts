@@ -197,6 +197,7 @@ export async function checkSession(req: Request, res: Response) {
         console.log('checkSession - payload completo:', payload);
         
         const response: any = {
+            id: payload.id,
             loggedIn: true, 
             name: payload.name, 
             email: payload.email, 

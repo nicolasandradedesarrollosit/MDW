@@ -5,9 +5,9 @@ import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
-import cartRoutes from './routes/cartRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import productSizesRoute from './routes/productSizeRoutes.js';
+import orderRoutes from './routes/orderRouter.js';
 
 dotenv.config();
 const app = express();
@@ -42,9 +42,9 @@ app.use((req, res, next) => {
 
 app.use('/api', userRoutes);
 app.use('/api', productRoutes);
-app.use('/api', cartRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', productSizesRoute);
+app.use('/api', orderRoutes);
 
 app.get('/health-check', async (_req, res) => {
     res.status(200).json({ ok: true, message: 'API corriendo' });
