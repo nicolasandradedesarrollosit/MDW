@@ -186,37 +186,73 @@ export async function logout(req: Request, res: Response) {
 }
 
 export async function checkSession(req: Request, res: Response) {
-    const token = req.cookies.accessToken;
+    const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
+    const isProduction = process.env.NODE_ENV === 'production';
 
-    if (!token) return res.status(401).json({loggedIn: false});
-
-    try {
-        const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-        const payload: any = jwt.verify(token, jwtSecret);
-        
-        console.log('checkSession - payload completo:', payload);
-        
-        const response: any = {
-            id: payload.id,
-            loggedIn: true, 
-            name: payload.name, 
-            email: payload.email, 
-            lastName: payload.lastName, 
-            age: payload.age,
-            isAdmin: payload.isAdmin
-        };
-
-        if (payload.isAdmin) {
-            console.log('checkSession - Usuario es admin!');
-            response.features = { adminPanel: true };
+    if (accessToken) {
+        try {
+            const payload: any = jwt.verify(accessToken, jwtSecret);
+            console.log('checkSession - access token valid, payload:', { id: payload.id, email: payload.email });
+            const response: any = {
+                id: payload.id,
+                loggedIn: true,
+                name: payload.name,
+                email: payload.email,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin,
+            };
+            if (payload.isAdmin) response.features = { adminPanel: true };
+            return res.json(response);
+        } catch (err) {
+            console.log('checkSession - access token invalid/expired:', err instanceof Error ? err.message : err);
         }
+    }
 
-        console.log('checkSession - response:', response);
-        res.json(response);
+    if (refreshToken) {
+        try {
+            const payload: any = jwt.verify(refreshToken, jwtRefreshSecret);
+            console.log('checkSession - refresh token valid, issuing new access token for user:', payload.id);
+
+            const newAccess = jwt.sign({
+                id: payload.id,
+                email: payload.email,
+                name: payload.name,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin || false,
+            }, jwtSecret, { expiresIn: '1h' });
+
+            res.cookie('accessToken', newAccess, {
+                httpOnly: true,
+                secure: isProduction,
+                sameSite: isProduction ? 'none' : 'lax',
+                maxAge: 60 * 1000 * 60,
+            });
+
+            const response: any = {
+                id: payload.id,
+                loggedIn: true,
+                name: payload.name,
+                email: payload.email,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin || false,
+            };
+            if (payload.isAdmin) response.features = { adminPanel: true };
+            return res.json(response);
+        } catch (err) {
+            console.log('checkSession - refresh token invalid/expired:', err instanceof Error ? err.message : err);
+            res.clearCookie('accessToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax' });
+            res.clearCookie('refreshToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax' });
+            return res.status(401).json({ loggedIn: false });
+        }
     }
-    catch (err) {
-        res.status(401).json({loggedIn: false});
-    }
+
+    return res.status(401).json({ loggedIn: false });
 }
 
 export async function getUsers(req: Request, res: Response) {
@@ -238,7 +274,6 @@ export async function logInUserGoogle(req: Request, res: Response) {
             return res.status(400).json({ message: 'Email es requerido' });
         }
 
-        // If an ID token is provided, try to verify it using firebase-admin if configured
         if (idToken) {
             try {
                 if (!admin.apps.length) {
@@ -267,14 +302,11 @@ export async function logInUserGoogle(req: Request, res: Response) {
 
         let user = await User.findOne({ email });
         if (!user) {
-            // Create a new user with a random password for Google accounts
             const randomPassword = Math.random().toString(36).slice(-8);
             const passwordHash = await bcrypt.hash(randomPassword, 10);
-            // If full name given, try to split into first and last name
             const nameParts = (name || '').trim().split(/\s+/).filter(Boolean);
             const firstName = nameParts.length > 0 ? nameParts[0] : (name || 'Google User');
             const lastNameFromName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-            // Provide defaults for required fields 'lastName' and 'age'
             const newUser = new User({ name: firstName, lastName: lastNameFromName || '', age: 0, email, password: passwordHash });
             console.log('Creating new user object (before save):', JSON.stringify({ name: newUser.name, lastName: newUser.lastName, age: newUser.age, email: newUser.email }));
             user = await newUser.save();
@@ -332,7 +364,6 @@ export async function logInUserGoogle(req: Request, res: Response) {
     }
     catch (err) {
         console.error('Error en logInUserGoogle:', err);
-        // Provide some debugging details during development
         res.status(500).json({ message: 'Error interno del servidor', detail: err instanceof Error ? err.message : String(err) });
     }
 }

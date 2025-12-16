@@ -16,7 +16,7 @@ r.post('/user', validationMiddleware(CreateUserDto), createUser);
 r.post('/login', validationMiddleware(LogInDto), logInUser);
 r.post('/login-google', logInUserGoogle);
 r.post('/logout', authMiddleware, logout);
-r.get('/check-session', authMiddleware, checkSession);
+r.get('/check-session', checkSession);
 r.get('/users', authMiddleware, adminMiddleware, getUsers);
 
 export default r;
