@@ -186,37 +186,78 @@ export async function logout(req: Request, res: Response) {
 }
 
 export async function checkSession(req: Request, res: Response) {
-    const token = req.cookies.accessToken;
+    const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+    const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_key';
+    const isProduction = process.env.NODE_ENV === 'production';
 
-    if (!token) return res.status(401).json({loggedIn: false});
-
-    try {
-        const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-        const payload: any = jwt.verify(token, jwtSecret);
-        
-        console.log('checkSession - payload completo:', payload);
-        
-        const response: any = {
-            id: payload.id,
-            loggedIn: true, 
-            name: payload.name, 
-            email: payload.email, 
-            lastName: payload.lastName, 
-            age: payload.age,
-            isAdmin: payload.isAdmin
-        };
-
-        if (payload.isAdmin) {
-            console.log('checkSession - Usuario es admin!');
-            response.features = { adminPanel: true };
+    // Try access token first
+    if (accessToken) {
+        try {
+            const payload: any = jwt.verify(accessToken, jwtSecret);
+            console.log('checkSession - access token valid, payload:', { id: payload.id, email: payload.email });
+            const response: any = {
+                id: payload.id,
+                loggedIn: true,
+                name: payload.name,
+                email: payload.email,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin,
+            };
+            if (payload.isAdmin) response.features = { adminPanel: true };
+            return res.json(response);
+        } catch (err) {
+            console.log('checkSession - access token invalid/expired:', err instanceof Error ? err.message : err);
+            // fallthrough to try refresh token
         }
+    }
 
-        console.log('checkSession - response:', response);
-        res.json(response);
+    // Try refresh token: if valid, issue a new access token and return session
+    if (refreshToken) {
+        try {
+            const payload: any = jwt.verify(refreshToken, jwtRefreshSecret);
+            console.log('checkSession - refresh token valid, issuing new access token for user:', payload.id);
+
+            const newAccess = jwt.sign({
+                id: payload.id,
+                email: payload.email,
+                name: payload.name,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin || false,
+            }, jwtSecret, { expiresIn: '1h' });
+
+            res.cookie('accessToken', newAccess, {
+                httpOnly: true,
+                secure: isProduction,
+                sameSite: isProduction ? 'none' : 'lax',
+                maxAge: 60 * 1000 * 60,
+            });
+
+            const response: any = {
+                id: payload.id,
+                loggedIn: true,
+                name: payload.name,
+                email: payload.email,
+                lastName: payload.lastName,
+                age: payload.age,
+                isAdmin: payload.isAdmin || false,
+            };
+            if (payload.isAdmin) response.features = { adminPanel: true };
+            return res.json(response);
+        } catch (err) {
+            console.log('checkSession - refresh token invalid/expired:', err instanceof Error ? err.message : err);
+            // clear cookies if refresh invalid
+            res.clearCookie('accessToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax' });
+            res.clearCookie('refreshToken', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax' });
+            return res.status(401).json({ loggedIn: false });
+        }
     }
-    catch (err) {
-        res.status(401).json({loggedIn: false});
-    }
+
+    // No valid tokens
+    return res.status(401).json({ loggedIn: false });
 }
 
 export async function getUsers(req: Request, res: Response) {
